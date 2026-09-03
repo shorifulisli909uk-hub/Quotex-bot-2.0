@@ -15,7 +15,6 @@ def setup_quotexapi():
         zip_path = "quotexapi.zip"
         url = "https://github.com/ericpedra/quotexapi/archive/refs/heads/main.zip"
         try:
-            urllib.request.urllibrequest = urllib.request.urlopen(url)
             urllib.request.urlretrieve(url, zip_path)
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall("temp_quotexapi")
