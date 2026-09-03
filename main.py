@@ -15,6 +15,7 @@ def setup_quotexapi():
         zip_path = "quotexapi.zip"
         url = "https://github.com/ericpedra/quotexapi/archive/refs/heads/main.zip"
         try:
+            urllib.request.urllibrequest = urllib.request.urlopen(url)
             urllib.request.urlretrieve(url, zip_path)
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall("temp_quotexapi")
@@ -86,8 +87,7 @@ async def process_sectioned_signals(text: str) -> str:
     lines = text.split('\n')
     
     current_mode = "NORMAL"
-    report = "📊 **SIGNAL RESULT REPORT** 📊\n"
-    report += "━━━━━━━━━━━━━━━━━━━━━\n"
+    report = "📊 SIGNAL RESULT REPORT 📊\n━━━━━━━━━━━━━━━━━━━━━\n"
 
     sections_found = 0
 
@@ -99,17 +99,17 @@ async def process_sectioned_signals(text: str) -> str:
         upper_line = clean_line.upper()
         if any(keyword in upper_line for keyword in ["NORMAL", "DIRECT", "FUTURE"]):
             current_mode = "NORMAL"
-            report += "\n🎯 **[NORMAL STRATEGY]**\n"
+            report += "\n🎯 [NORMAL STRATEGY]\n"
             sections_found += 1
             continue
         elif any(keyword in upper_line for keyword in ["SAME CANDLE", "RG AI", "SAME"]):
             current_mode = "SAME"
-            report += "\n💸 **[SAME CANDLE STRATEGY]**\n"
+            report += "\n💸 [SAME CANDLE STRATEGY]\n"
             sections_found += 1
             continue
         elif any(keyword in upper_line for keyword in ["BLACKOUT", "OPPOSITE", "REVERSAL"]):
             current_mode = "BLACKOUT"
-            report += "\n☣️ **[BLACKOUT STRATEGY]**\n"
+            report += "\n☣️ [BLACKOUT STRATEGY]\n"
             sections_found += 1
             continue
 
@@ -128,14 +128,14 @@ async def process_sectioned_signals(text: str) -> str:
                     
                     main_res = await get_candle_status(pair, time_str)
                     if main_res == target_direction:
-                        report += f"🔹 `{time_str}` **{pair}** ➔ ✅ WIN ({target_direction})\n"
+                        report += f"🔹 {time_str} {pair} ➔ ✅ WIN ({target_direction})\n"
                     else:
                         mtg_time = adjust_time(time_str, 1)
                         mtg_res = await get_candle_status(pair, mtg_time)
                         if mtg_res == target_direction:
-                            report += f"🔹 `{time_str}` **{pair}** ➔ ✅¹ WIN ({target_direction})\n"
+                            report += f"🔹 {time_str} {pair} ➔ ✅¹ WIN ({target_direction})\n"
                         else:
-                            report += f"🔹 `{time_str}` **{pair}** ➔ ❌ LOSS ({target_direction})\n"
+                            report += f"🔹 {time_str} {pair} ➔ ❌ LOSS ({target_direction})\n"
 
             elif current_mode == "SAME":
                 prev_time = adjust_time(time_str, -1)
@@ -144,14 +144,14 @@ async def process_sectioned_signals(text: str) -> str:
 
                 main_res = await get_candle_status(pair, time_str)
                 if main_res == target_direction:
-                    report += f"🔹 `{time_str}` **{pair}** ➔ ✅ WIN ({target_direction})\n"
+                    report += f"🔹 {time_str} {pair} ➔ ✅ WIN ({target_direction})\n"
                 else:
                     mtg_time = adjust_time(time_str, 1)
                     mtg_res = await get_candle_status(pair, mtg_time)
                     if mtg_res == target_direction:
-                        report += f"🔹 `{time_str}` **{pair}** ➔ ✅¹ WIN ({target_direction})\n"
+                        report += f"🔹 {time_str} {pair} ➔ ✅¹ WIN ({target_direction})\n"
                     else:
-                        report += f"🔹 `{time_str}` **{pair}** ➔ ❌ LOSS ({target_direction})\n"
+                        report += f"🔹 {time_str} {pair} ➔ ❌ LOSS ({target_direction})\n"
 
             elif current_mode == "BLACKOUT":
                 prev_time = adjust_time(time_str, -1)
@@ -160,17 +160,17 @@ async def process_sectioned_signals(text: str) -> str:
 
                 main_res = await get_candle_status(pair, time_str)
                 if main_res == target_direction:
-                    report += f"🔹 `{time_str}` **{pair}** ➔ ✅ WIN ({target_direction})\n"
+                    report += f"🔹 {time_str} {pair} ➔ ✅ WIN ({target_direction})\n"
                 else:
                     mtg_time = adjust_time(time_str, 1)
                     mtg_res = await get_candle_status(pair, mtg_time)
                     if mtg_res == target_direction:
-                        report += f"🔹 `{time_str}` **{pair}** ➔ ✅¹ WIN ({target_direction})\n"
+                        report += f"🔹 {time_str} {pair} ➔ ✅¹ WIN ({target_direction})\n"
                     else:
-                        report += f"🔹 `{time_str}` **{pair}** ➔ ❌ LOSS ({target_direction})\n"
+                        report += f"🔹 {time_str} {pair} ➔ ❌ LOSS ({target_direction})\n"
 
     if sections_found == 0 and "🔹" not in report:
-        return "❌ **কোনো সঠিক সিগন্যাল পাওয়া যায়নি!**"
+        return "❌ কোনো সঠিক সিগন্যাল পাওয়া যায়নি!"
 
     return report
 
@@ -179,22 +179,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = await update.message.reply_text("⏳ সিগন্যাল চেক করা হচ্ছে...")
 
     result_report = await process_sectioned_signals(user_text)
-    await msg.edit_text(result_report, parse_mode="Markdown")
+    await msg.edit_text(result_report)
 
 async def admin_settings(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.effective_user.id != ADMIN_ID:
         return
     
-    msg = f"⚙️ **Bot Admin Settings**\n"
-    msg += f"━━━━━━━━━━━━━━━━━━━━━\n"
-    msg += f"👤 **Admin ID:** `{ADMIN_ID}`\n"
-    msg += f"📧 **Quotex Email:** `{QUOTEX_EMAIL}`\n"
-    msg += f"🔑 **Quotex Pass:** `{QUOTEX_PASSWORD}`\n\n"
-    msg += "⚙️ **Commands to Change:**\n"
-    msg += "` /setemail <new_email>`\n"
-    msg += "` /setpass <new_password>`"
-    
-    await update.message.reply_text(msg, parse_mode="Markdown")
+    msg = f"⚙️ Bot Admin Settings\n━━━━━━━━━━━━━━━━━━━━━\n👤 Admin ID: {ADMIN_ID}\n📧 Quotex Email: {QUOTEX_EMAIL}\n🔑 Quotex Pass: {QUOTEX_PASSWORD}\n\n⚙️ Commands to Change:\n/setemail <new_email>\n/setpass <new_password>"
+    await update.message.reply_text(msg)
 
 async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global QUOTEX_EMAIL
@@ -204,7 +196,7 @@ async def set_email(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if context.args:
         QUOTEX_EMAIL = context.args[0]
         await init_quotex()
-        await update.message.reply_text(f"✅ Quotex Email updated to: `{QUOTEX_EMAIL}`", parse_mode="Markdown")
+        await update.message.reply_text(f"✅ Quotex Email updated to: {QUOTEX_EMAIL}")
 
 async def set_pass(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global QUOTEX_PASSWORD
