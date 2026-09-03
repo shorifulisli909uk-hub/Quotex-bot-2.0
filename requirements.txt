@@ -1,0 +1,2 @@
+python-telegram-bot
+git+https://github.com/Luiz-Carlos-S/quotexapi.git
