@@ -1,1 +1,0 @@
-# Quotex-bot-2.0
