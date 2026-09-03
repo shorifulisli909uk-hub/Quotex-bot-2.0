@@ -1,2 +1,2 @@
-python-telegram-bot
-git+https://github.com/Luiz-Carlos-S/quotexapi.git
+python-telegram-bot>=20.0
+quotexapi
