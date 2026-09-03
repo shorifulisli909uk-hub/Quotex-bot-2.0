@@ -1,10 +1,40 @@
+import os
+import sys
 import re
 import asyncio
 import datetime
+import urllib.request
+import zipfile
+
+# =============================================================
+# AUTO-DOWNLOAD & SETUP QUOTEXAPI LIBRARY AT RUNTIME
+# =============================================================
+def setup_quotexapi():
+    if not os.path.exists("quotexapi"):
+        print("📦 Downloading Quotex API package...")
+        zip_path = "quotexapi.zip"
+        url = "https://github.com/ericpedra/quotexapi/archive/refs/heads/main.zip"
+        try:
+            urllib.request.urlretrieve(url, zip_path)
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall("temp_quotexapi")
+            
+            extracted_dir = os.path.join("temp_quotexapi", "quotexapi-main", "quotexapi")
+            if os.path.exists(extracted_dir):
+                os.rename(extracted_dir, "quotexapi")
+            print("✅ Quotex API package installed successfully!")
+        except Exception as e:
+            print(f"❌ Failed to auto-install Quotex API: {e}")
+
+setup_quotexapi()
+
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, CommandHandler, filters, ContextTypes
 from quotexapi.stable_api import Quotex
 
+# =============================================================
+# CONFIGURATION
+# =============================================================
 QUOTEX_EMAIL = "raihanusa77uk@gmail.com"
 QUOTEX_PASSWORD = "Asdf@1234"
 TELEGRAM_BOT_TOKEN = "8659731733:AAGBbQGmUhTd1aDzBAk6cSSseC65cjBV33I"
@@ -140,7 +170,7 @@ async def process_sectioned_signals(text: str) -> str:
                         report += f"🔹 `{time_str}` **{pair}** ➔ ❌ LOSS ({target_direction})\n"
 
     if sections_found == 0 and "🔹" not in report:
-        return "❌ **কোনো সঠিক সিগন্যাল পাওয়া যায়নি!**"
+        return "❌ **কোনো সঠিক সিগন্যাল পাওয়া যায়নি!**"
 
     return report
 
@@ -200,5 +230,7 @@ async def main():
     await app.run_polling()
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        print("Bot Stopped!")
