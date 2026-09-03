@@ -1,2 +1,2 @@
 python-telegram-bot>=20.0
-quotexapi
+https://github.com/Luiz-Carlos-S/quotexapi/archive/refs/heads/main.zip
