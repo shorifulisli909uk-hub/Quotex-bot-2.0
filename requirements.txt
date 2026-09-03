@@ -1,2 +1,3 @@
 python-telegram-bot>=20.0
-https://github.com/ericpedra/quotexapi/archive/refs/heads/main.zip
+websocket-client
+requests
